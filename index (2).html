@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stone Age Story Quest – 6th Grade ELA</title>
+<style>
+:root{--bg:#f3e6d0;--card:#fffaf0;--ink:#3b2a1a;--rock:#7a5c3e;--fire:#e8590c;--gold:#f59f00;--ok:#2f9e44;--no:#c92a2a}
+*{box-sizing:border-box}
+body{margin:0;font-family:Georgia,"Trebuchet MS",serif;background:var(--bg);color:var(--ink);line-height:1.55}
+header{background:linear-gradient(#5c4128,#7a5c3e);color:#fff;text-align:center;padding:18px 12px}
+header h1{margin:0;font-size:1.7rem}header p{margin:4px 0 0;opacity:.9}
+main{max-width:760px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:3px solid var(--rock);border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 4px 0 #b99a74}
+.bar{height:16px;background:#d9c3a0;border-radius:10px;overflow:hidden;margin:6px 0}
+.bar div{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--fire));transition:width .5s}
+.pass p{margin:.6em 0}
+.pass b{background:#ffe8a3;border-radius:4px;padding:0 3px}
+button{font:inherit;cursor:pointer;border:2px solid var(--rock);background:#fff;border-radius:12px;padding:10px 14px;margin:5px 0;text-align:left;width:100%;color:var(--ink)}
+button:hover:not(:disabled){background:#ffe8a3}
+button.go{background:var(--fire);color:#fff;border-color:#a63d00;text-align:center;width:auto;font-weight:bold;padding:10px 22px}
+button.right{background:#d3f9d8;border-color:var(--ok)}button.wrong{background:#ffe3e3;border-color:var(--no)}
+.fb{margin-top:10px;padding:10px;border-radius:10px;display:none}
+.fb.ok{display:block;background:#d3f9d8}.fb.no{display:block;background:#ffe3e3}
+.tag{display:inline-block;background:var(--rock);color:#fff;border-radius:20px;padding:2px 12px;font-size:.8rem}
+.hint{font-size:.9rem;color:#6b4f33;cursor:pointer;text-decoration:underline;display:inline-block;margin-top:6px}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.row span{flex:1 1 60%}.row button{width:auto;flex:0 0 auto;margin:0;padding:8px 14px}
+input[type=text]{font:inherit;padding:8px;border:2px solid var(--rock);border-radius:10px;width:100%}
+.big{font-size:3rem;text-align:center}
+pre{white-space:pre-wrap;background:#f1e3c8;padding:10px;border-radius:10px;font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}@media(min-width:560px){.grid{grid-template-columns:repeat(4,1fr)}}
+.tile{min-height:80px;text-align:center;font-size:.85rem;margin:0;background:var(--rock);color:#fff;display:flex;align-items:center;justify-content:center}
+.tile.up{background:#fff;color:var(--ink)}.tile.done{background:#d3f9d8;border-color:var(--ok);color:var(--ink)}
+.menu{display:grid;gap:10px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header><h1>🔥 Stone Age Story Quest 🦣</h1><p>Read the passage, crack the clues, and keep the fire burning!</p></header>
+<main>
+<div class="card"><div>🔥 Fire Meter: <b id="score">0</b> / <span id="total">0</span></div><div class="bar"><div id="prog"></div></div></div>
+<div id="app"></div>
+</main>
+<script>
+const passage=`
+<p>Long before cities, books, or even farms, humans lived in the <b>Stone Age</b>. This huge stretch of time began about 2.5 million years ago, when our ancestors first chipped rocks into sharp tools. Flint could slice meat, scrape animal hides, and shape wood into spears.</p>
+<p>Early people were <b>nomadic</b>. Small bands followed herds of animals and ripening plants from place to place. When food grew <b>scarce</b> in winter, the band packed up and moved to find more.</p>
+<p>Controlling fire was a turning point. Flames gave warmth during icy nights, scared away hungry predators, and made food easier to chew and digest. Fire also gave people a glowing place to gather, share stories, and teach children.</p>
+<p>Some people also made art. In caves, they painted horses, bison, and handprints using <b>pigments</b> ground from ochre and charcoal and mixed with animal fat. Many of these paintings are still visible after more than 17,000 years.</p>
+<p>Around 10,000 years ago, people learned to plant seeds and raise animals. Crops need tending, so families stayed in one place and built the first villages. The long Stone Age was ending, but the tools, fire, and stories of those early humans shaped everything that followed.</p>`;
+const Q=[
+{t:"Vocabulary",q:"Read this sentence: “Small bands followed herds of animals and ripening plants from place to place.” What does <b>nomadic</b> mean?",o:["Moving from place to place","Living in one village","Afraid of animals","Good at painting"],a:0,h:"Look at the words after the word nomadic. What did the bands do?",e:"The clue “from place to place” shows nomadic people keep moving."},
+{t:"Vocabulary",q:"“When food grew <b>scarce</b> in winter, the band packed up and moved.” What does <b>scarce</b> mean?",o:["Delicious","Hard to find; not enough","Easy to carry","Very hot"],a:1,h:"Why would a band pack up and move?",e:"People moved to find more food, so food must have been hard to find."},
+{t:"Vocabulary",q:"The passage says people painted with <b>pigments</b> ground from ochre and charcoal. What are <b>pigments</b>?",o:["Cave animals","Sharp stone tools","Colored substances used to make paint","Types of fire"],a:2,h:"What do you do with ground-up ochre and charcoal mixed with fat?",e:"They mixed them to make paint, so pigments are colored materials."},
+{t:"Central Idea",q:"Which sentence states the <b>central idea</b> of the passage?",o:["Flint is good for cutting meat.","Stone Age people used tools, fire, art, and later farming in ways that shaped life that followed.","Cave paintings are more than 17,000 years old.","Winter was a hard time to find food."],a:1,h:"The central idea covers the WHOLE passage, not just one paragraph.",e:"The other choices are details. Only one sentence covers all five paragraphs."},
+{t:"Text Evidence",q:"Which detail BEST supports this claim: <i>“Fire helped early humans survive.”</i>",o:["Fire gave people a place to share stories.","Flames gave warmth, scared away predators, and made food easier to digest.","Cave paintings used ochre and charcoal.","Villages were built around 10,000 years ago."],a:1,h:"Survival means staying alive. Which detail is about staying safe, warm, or fed?",e:"Warmth, safety from predators, and better food all help people stay alive."},
+{t:"Inference",q:"Based on the last paragraph, why did people begin building villages?",o:["They no longer needed fire.","They ran out of flint.","Planted crops had to be cared for, so they stayed in one place.","They wanted to move farther away."],a:2,h:"Reread: “Crops need tending, so families…”",e:"Farming kept people near their fields. That is the cause; villages are the effect."}
+];
+const FO=[
+{s:"The Stone Age began about 2.5 million years ago.",f:true},
+{s:"Cave paintings are the most beautiful art ever made.",f:false},
+{s:"Early people used flint to make sharp tools.",f:true},
+{s:"Life in a nomadic band was more fun than village life.",f:false}
+];
+let i=-1,score=0,missed=[],total=Q.length+FO.length,answered=0;
+const $=id=>document.getElementById(id);
+$("total").textContent=total;
+function bump(ok,label){if(ok)score++;else missed.push(label);answered++;$("score").textContent=score;$("prog").style.width=(answered/total*100)+"%"}
+function start(){$("app").innerHTML=`<div class="card"><h2>🪨 Your Mission</h2><p>You are a young cave explorer. Play the Story Quest first, or jump straight into the Game Zone!</p><p> Read about the Stone Age, then answer ${total} questions to keep your fire burning. Wrong answers teach you something, so read the feedback!</p><label>Your name:<input type="text" id="nm" placeholder="Type your first name"></label><p><button class="go" onclick="read()">Enter the Cave ➜</button> <button class="go" onclick="zone()" style="background:#5f3dc4;border-color:#3b2a8a">🎮 Game Zone</button></p></div>`}
+function read(){window.name_=($("nm")||{}).value||"Explorer";$("app").innerHTML=`<div class="card pass"><span class="tag">Read</span><h2>The Long Story of the Stone Age</h2>${passage}<p><i>Tip: the highlighted words are tricky. Look for clues around them!</i></p><p><button class="go" onclick="next()">I'm ready ➜</button></p></div>`}
+function next(){i++;if(i<Q.length)return ask();if(i<Q.length+FO.length+0&&i===Q.length)return sortStage();finish()}
+function ask(){const q=Q[i];$("app").innerHTML=`<div class="card"><span class="tag">${q.t} · Question ${i+1} of ${Q.length}</span><p>${q.q}</p><div id="opts">${q.o.map((x,n)=>`<button onclick="pick(${n})">${"ABCD"[n]}. ${x}</button>`).join("")}</div><span class="hint" onclick="this.outerHTML='<p>💡 '+Q[i].h+'</p>'">Need a hint?</span><div class="fb" id="fb"></div><p id="nx"></p></div>`}
+function pick(n){const q=Q[i],b=[...document.querySelectorAll("#opts button")];b.forEach(x=>x.disabled=true);b[q.a].classList.add("right");const ok=n===q.a;if(!ok)b[n].classList.add("wrong");const f=$("fb");f.className="fb "+(ok?"ok":"no");f.innerHTML=(ok?"🔥 Correct! ":"🪨 Not quite. ")+q.e;bump(ok,q.t+" Q"+(i+1));$("nx").innerHTML='<button class="go" onclick="next()">Next ➜</button>'}
+let sortAns;
+function sortStage(){sortAns={};$("app").innerHTML=`<div class="card"><span class="tag">Fact or Opinion</span><p>A <b>fact</b> can be proven. An <b>opinion</b> tells what someone thinks or feels. Sort each statement!</p>${FO.map((x,n)=>`<div class="row" id="r${n}"><span>${x.s}</span><button onclick="sort(${n},true)">Fact</button><button onclick="sort(${n},false)">Opinion</button></div>`).join("")}<div class="fb" id="fb"></div><p id="nx"></p></div>`}
+function sort(n,v){if(n in sortAns)return;sortAns[n]=v;const ok=FO[n].f===v;const r=$("r"+n);r.querySelectorAll("button").forEach(b=>b.disabled=true);r.style.background=ok?"#d3f9d8":"#ffe3e3";r.insertAdjacentHTML("beforeend",`<span>${ok?"✅":"❌ It is "+(FO[n].f?"a fact":"an opinion")}</span>`);bump(ok,"Fact/Opinion #"+(n+1));if(Object.keys(sortAns).length===FO.length)$("nx").innerHTML='<button class="go" onclick="finish()">See My Results ➜</button>'}
+function finish(){const p=score/total,r=p>=.9?["👑","Chief Storyteller"]:p>=.7?["🔥","Fire Keeper"]:p>=.5?["🪓","Flint Knapper"]:["🪨","Cave Rookie"];
+const rep=`Name: ${window.name_}\nActivity: Stone Age Story Quest\nScore: ${score}/${total}\nMissed: ${missed.join(", ")||"None"}`;
+$("app").innerHTML=`<div class="card"><div class="big">${r[0]}</div><h2 style="text-align:center">${r[1]}!</h2><p style="text-align:center;font-size:1.3rem">${window.name_}, you scored <b>${score} / ${total}</b></p><p>${missed.length?"Review: "+missed.join(", "):"Perfect! No missed questions."}</p><p><b>Copy this to your teacher or Google Form:</b></p><pre id="rep">${rep}</pre><p><button class="go" onclick="navigator.clipboard.writeText($('rep').textContent).then(()=>this.textContent='Copied! ✅')">Copy My Score</button> <button class="go" onclick="location.reload()">Play Again 🔁</button> <button class="go" onclick="zone()" style="background:#5f3dc4;border-color:#3b2a8a">🎮 Game Zone</button></p></div>`}
+let tmr=null;
+function shuffle(a){return a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1])}
+function zone(){clearInterval(tmr);window.name_=($("nm")||{}).value||window.name_||"Explorer";
+$("app").innerHTML=`<div class="card"><h2>🎮 Game Zone</h2><p>Pick a game! Every game practices the Stone Age vocabulary from the story.</p><div class="menu"><button onclick="memory()">🪨 <b>Memory Stones</b><br>Flip stones to match each word with its meaning.</button><button onclick="rapid()">🔥 <b>Fire Keeper Rapid Fire</b><br>Beat the clock! Pick the word that fits before your fire dies.</button><button onclick="start()">⬅ Back to the Story Quest</button></div></div>`}
+const PAIRS=[["nomadic","Moving from place to place"],["scarce","Hard to find; not enough"],["pigment","Colored material used to make paint"],["flint","Hard stone chipped into sharp tools"],["predator","An animal that hunts other animals"],["crops","Plants grown for food"]];
+let mem;
+function memory(){clearInterval(tmr);const t=[];PAIRS.forEach((p,n)=>{t.push({k:n,x:p[0]});t.push({k:n,x:p[1]})});mem={t:shuffle(t),open:[],moves:0,found:0,lock:false};
+$("app").innerHTML=`<div class="card"><span class="tag">Memory Stones</span><p>Match each word to its meaning. Moves: <b id="mv">0</b></p><div class="grid">${mem.t.map((x,n)=>`<button class="tile" id="t${n}" onclick="flip(${n})">🪨</button>`).join("")}</div><p id="nx"></p><p><button class="go" onclick="memory()">Shuffle 🔁</button> <button class="go" onclick="zone()">⬅ Game Zone</button></p></div>`}
+function flip(n){if(mem.lock||mem.open.includes(n))return;const b=$("t"+n);b.classList.add("up");b.innerHTML=mem.t[n].x;mem.open.push(n);if(mem.open.length<2)return;
+mem.moves++;$("mv").textContent=mem.moves;const[a,c]=mem.open;
+if(mem.t[a].k===mem.t[c].k){[a,c].forEach(m=>{$("t"+m).className="tile done";$("t"+m).disabled=true});mem.open=[];if(++mem.found===PAIRS.length){const s=mem.moves<=9?"⭐⭐⭐":mem.moves<=14?"⭐⭐":"⭐";$("nx").innerHTML=`<b>🎉 You matched them all in ${mem.moves} moves! ${s}</b>`}}
+else{mem.lock=true;setTimeout(()=>{[a,c].forEach(m=>{const e=$("t"+m);e.className="tile";e.innerHTML="🪨"});mem.open=[];mem.lock=false},900)}}
+const RF=[["The tribe was ____, so they followed the herds across the land.","nomadic"],["Food was ____ in winter, so everyone shared carefully.","scarce"],["She mixed red ochre into a ____ to paint a bison.","pigment"],["A sharp piece of ____ could slice meat.","flint"],["The ____ crept closer, so the band lit a fire.","predator"],["Families must keep their ____ watered to grow food.","crops"],["Berries were hard to find, so they were ____.","scarce"],["Charcoal made a dark black ____.","pigment"],["A wolf is a ____ that hunts in packs.","predator"],["Moving from camp to camp was part of ____ life.","nomadic"]];
+const WORDS=["nomadic","scarce","pigment","flint","predator","crops"];
+let rf;
+function rapid(){clearInterval(tmr);rf={q:shuffle(RF),n:0,pts:0,lives:3,streak:0,best:0,time:45,miss:[],lock:false,done:0};
+$("app").innerHTML=`<div class="card"><span class="tag">Fire Keeper Rapid Fire</span><p>Pick the word that fits the blank. Right answers add 2 seconds and build streak bonuses. Three wrong answers puts out your fire!</p><p id="hud" style="font-size:1.3rem;text-align:center"></p><div id="rq"></div><p><button class="go" onclick="zone()">⬅ Game Zone</button></p></div>`;
+hud();rq();tmr=setInterval(()=>{rf.time--;hud();if(rf.time<=0)endRf()},1000)}
+function hud(){if(!$("hud"))return;$("hud").innerHTML=`⏱ ${Math.max(rf.time,0)}s &nbsp; ${"❤️".repeat(rf.lives)}${"🖤".repeat(3-rf.lives)} &nbsp; ⭐ ${rf.pts} &nbsp; 🔥 x${rf.streak}`}
+function rq(){if(!$("rq"))return;const[s,a]=rf.q[rf.n];const o=shuffle([a,...shuffle(WORDS.filter(w=>w!==a)).slice(0,2)]);
+$("rq").innerHTML=`<p style="font-size:1.15rem"><b>${s.replace("____","<u>&nbsp;&nbsp;?&nbsp;&nbsp;</u>")}</b></p>`+o.map(w=>`<button onclick="ans('${w}','${a}',this)">${w}</button>`).join("")}
+function ans(w,a,b){if(rf.lock||rf.done)return;rf.lock=true;
+if(w===a){rf.streak++;rf.best=Math.max(rf.best,rf.streak);rf.pts+=10+Math.min(rf.streak-1,5)*2;rf.time+=2;b.classList.add("right")}
+else{rf.streak=0;rf.lives--;rf.miss.push(a);b.classList.add("wrong")}
+hud();setTimeout(()=>{rf.lock=false;if(rf.lives<=0||rf.time<=0)return endRf();rf.n++;if(rf.n>=rf.q.length)rf.q=rf.q.concat(shuffle(RF));rq()},600)}
+function endRf(){if(rf.done)return;rf.done=1;clearInterval(tmr);const r=rf.pts>=150?["👑","Fire Master"]:rf.pts>=80?["🔥","Fire Keeper"]:["🪨","Spark Starter"];
+const rv=[...new Set(rf.miss)].join(", ")||"None";
+const rep=`Name: ${window.name_||"Explorer"}\nGame: Fire Keeper Rapid Fire\nPoints: ${rf.pts}\nBest streak: ${rf.best}\nWords to review: ${rv}`;
+$("app").innerHTML=`<div class="card"><div class="big">${r[0]}</div><h2 style="text-align:center">${r[1]}!</h2><p style="text-align:center;font-size:1.2rem">${rf.pts} points · best streak ${rf.best}</p><p>Words to review: ${rv}</p><pre id="rep">${rep}</pre><p><button class="go" onclick="navigator.clipboard.writeText($('rep').textContent).then(()=>this.textContent='Copied! ✅')">Copy My Score</button> <button class="go" onclick="rapid()">Play Again 🔁</button> <button class="go" onclick="zone()">Game Zone</button></p></div>`}
+start();
+</script>
+</body>
+</html>
